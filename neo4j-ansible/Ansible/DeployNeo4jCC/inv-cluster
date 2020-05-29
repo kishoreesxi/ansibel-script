@@ -1,0 +1,40 @@
+########################################################################################
+##  Copyright (c) Neo4j (2019) All rights reserved 
+    
+##  Name         : inv-cluster
+
+##  Description  : This inventory file can be used as a template.  
+##				   For each cluster there should be a seperate inventory file
+##                 naming each inventory accordingly and starting with inv- 
+##                 so that it is clear this is an inventory file.
+##                 var_file= is used for settings in the neo4j.conf file
+##                 for each inventory file you should have cosponsoring var file.
+##                 So dont forget to change this and make a new var file in the vars dir.
+
+##  Usage        : ansible-playbook -i inv-cluster -u <REMOTE_USER> playbook-name.yml
+
+##  Notes        : The cluster group has two subgroups core_servers and read_replica_servers.
+##                 Add the servers to the different groups by IP or host name if DNS is in-use.
+##	               After each server the gvar_server_group= variable sets the group the server is in.
+
+########################################################################################
+########################################################################################
+[all:vars]
+var_file=neo4j.yml
+
+##################
+# Host Groups
+##################
+[neo4j]
+10.213.21.25
+[cluster:children]
+core_servers
+read_replica_servers
+
+[core_servers]
+10.150.0.14 gvar_server_group=core
+10.150.0.15 gvar_server_group=core
+10.150.0.16 gvar_server_group=core
+
+[read_replica_servers]
+10.150.0.17 gvar_server_group=rr

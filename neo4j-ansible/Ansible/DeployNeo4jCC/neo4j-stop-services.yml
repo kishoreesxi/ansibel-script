@@ -1,0 +1,30 @@
+########################################################################################
+##  Copyright (c) Neo4j (2019) All rights reserved 
+    
+##  Name         : neo4j-stop-services.yml
+
+##  Description  : This playbook stops the Neo4j process on all systems in the cluster group from a supplied inventory file.
+##                 Task is preformed as the neo4j user.
+
+##  Usage        : ansible-playbook -i inv-inventory-name -u <REMOTE_USER> neo4j-stop-services.yml
+
+##  Notes        : Make sure you change the remote_user variable to a user that 
+##				   can SSH to other hosts using SSH keys.
+##
+##                 Playbook has been tested on Amazon Linux release 2 (Karoo)
+
+########################################################################################
+########################################################################################
+
+---
+- hosts: neo4j
+  gather_facts: false
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars_files:
+
+  tasks:
+    - name: Stoping the Neo4j Service
+      raw: /home/neo4j/neo4j_current/bin/neo4j stop
+

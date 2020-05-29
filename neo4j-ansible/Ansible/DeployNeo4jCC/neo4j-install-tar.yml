@@ -1,0 +1,54 @@
+########################################################################################
+##  Copyright (c) Neo4j (2019) All rights reserved 
+    
+##  Name         : neo4j-install-tar.yml
+
+##  Description  : This playbook downloads and extracts the specified version of Neo4j
+##                 to systems in the cluster group from a supplied inventory file.
+##                 So that the path to Neo4j can seem the same a symlink is configured.
+
+##  Usage        : ansible-playbook -i inv-inventory-name -u <REMOTE_USER> neo4j-install-tar.yml
+
+##  Notes        : Make sure you change the remote_user variable to a user that 
+##                 can SSH to other hosts using SSH keys.
+##                 Update the version for the intended version of install.
+##                 If error on download confirm that the naming format has not change in the download link.
+##
+##                 Playbook has been tested on Amazon Linux release 2 (Karoo)
+
+########################################################################################
+########################################################################################
+
+---
+- hosts: neo4j
+  gather_facts: false
+  become_user: root
+  become_method: sudo
+  become: true
+  vars_files:
+  vars:
+    neo4jver: 3.4.12
+ 
+  tasks:
+
+    - name: Download Neo4j {{ neo4jver }}
+      get_url:
+        url: http://dist.neo4j.org/neo4j-enterprise-{{ neo4jver }}-unix.tar.gz
+        dest: /home/neo4j
+        mode: 0755
+      become_user: neo4j
+
+    - name: Extract neo4j-enterprise-{{ neo4jver }}-unix.tar.gz
+      unarchive:
+        src: /home/neo4j/neo4j-enterprise-{{ neo4jver }}-unix.tar.gz
+        dest: /home/neo4j
+        remote_src: yes
+      become_user: neo4j
+
+    - name: Symlink Neo4j Install Directory to neo4j_current
+      file:
+        src: /home/neo4j/neo4j-enterprise-{{ neo4jver }}
+        dest: /home/neo4j/neo4j_current
+        state: link
+
+

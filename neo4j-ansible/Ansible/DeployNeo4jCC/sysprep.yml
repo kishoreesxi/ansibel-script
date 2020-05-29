@@ -1,0 +1,58 @@
+########################################################################################
+##  Copyright (c) Neo4j (2019) All rights reserved 
+    
+##  Name         : sysprep.yml
+
+##  Description  : This playbook preps the systems in the cluster group 
+##                 from a supplied inventory file for a Neo4j install. 
+##                 Python is install for Ansible use on the remote hosts.
+##                 The Neo4j user is set-up and added to the Wheel group.
+##                 The Wheel group is also configured so that no password is needed for SSH.
+##                 Finally Java is installed.
+
+##  Usage        : ansible-playbook -i inv-inventory-name -u <REMOTE_USER> sysprep.yml
+
+##  Notes        : Make sure you change the remote_user variable to a user that 
+##                 can SSH to other hosts using SSH keys.
+##
+##                 Playbook has been tested on Amazon Linux release 2 (Karoo)
+   
+########################################################################################
+########################################################################################
+
+---
+- hosts: neo4j
+  gather_facts: no
+  become: yes
+  become_user: root
+  become_method: sudo
+
+  tasks:
+    - name: Install  Python 2
+      yum:
+        name: python
+        state: present
+
+    - name: Create neo4j user account
+      user:
+        name: neo4j
+        uid: 1050
+        group: wheel
+
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
+
+    - name: Allow 'wheel' group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: Installing Java
+      yum:
+        name: java-1.8.0-openjdk
+        state: present

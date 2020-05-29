@@ -1,0 +1,32 @@
+########################################################################################
+##  Copyright (c) Neo4j (2019) All rights reserved 
+    
+##  Name         : cluster.yml
+
+##  Description  : This variable file has settings that are used in a specific cluster deploy.
+##                 
+##
+
+##  Usage        : An Inventory file points to this variable file.
+
+##  Notes        : Variables can be set here that are used when deploying the neo4j.conf
+##				   If you have more then one cluster have cosponsoring variable files for each cluster.
+
+########################################################################################
+########################################################################################
+
+---
+
+##############################
+# Neo4j Memmory Settings
+##############################
+
+gvar_init_heap_size: 1g
+
+gvar_max_heap_size: 1g
+
+gvar_page_cache: 512m
+
+gvar_init_cluster_size: 3
+
+gvar_total_cluster_size: 3

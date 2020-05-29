@@ -1,0 +1,69 @@
+########################################################################################
+##  Copyright (c) Neo4j (2019) All rights reserved 
+    
+##  Name         : neo4j-config-tar-cluster.yml
+
+##  Description  : This playbook configures the cluster with specific settings 
+##                 depending on if the node is a CORE or READ REPLICA.
+##                 This is done using a template with some logic 
+##                 to systems in the cluster group from a supplied inventory file.
+
+##  Usage        : ansible-playbook -i inv-inventory-name -u <REMOTE_USER> neo4j-config-tar-cluster.yml
+
+##  Notes        : Make sure you change the remote_user variable to a user that 
+##                 can SSH to other hosts using SSH keys.
+##
+##                 Playbook has been tested on Amazon Linux release 2 (Karoo)
+
+########################################################################################
+########################################################################################
+
+---
+- hosts: neo4j
+  gather_facts: false
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars_files:
+  - vars/{{ var_file }}
+  
+  tasks:
+
+########################################################################################
+## This section deploys the neo4j.conf template to the CORE Nodes.
+########################################################################################
+
+    - name: Setting gvar_mode to CORE for core server configuration.
+      set_fact:
+        gvar_mode: CORE
+      when: "'core_servers' in group_names"
+
+    - name: Deploy neo4j.conf to Core Servers
+      template:
+        src: './templates/neo4j-3.4.12-TAR.conf.j2'
+        dest: '/home/neo4j/neo4j_current/conf/neo4j.conf'
+        owner: neo4j
+        group: wheel
+        mode: '0644'
+        backup: yes
+      when: "'core_servers' in group_names"
+
+  
+########################################################################################
+## This section deploys the neo4j.conf template to the READ REPLICA Nodes.
+########################################################################################
+
+    - name: Setting gvar_mode to READ_REPLICA for read replica server configuration.
+      set_fact:
+        gvar_mode: READ_REPLICA
+      when: "'read_replica_servers' in group_names"
+
+    - name: Deploy neo4j.conf to Read Replica Servers
+      template:
+        src: './templates/neo4j-3.4.12-TAR.conf.j2'
+        dest: '/home/neo4j/neo4j_current/conf/neo4j.conf'
+        owner: neo4j
+        group: wheel
+        mode: '0644'
+        backup: yes
+      when: "'read_replica_servers' in group_names"
